@@ -1,0 +1,8 @@
+This is an example GUI using Processing. If you're going to use this app, you'll probably need to download the ControlP5 library:
+http://www.sojamo.de/libraries/controlP5/
+And then install this library by sticking it to the correct processing library directory. This can be tricky. For Windows 7, it's:
+C:\Users\NetBook2\Documents\Processing\libraries\controlP5\(all the files in the zip folder)
+
+Why is was the GUI written in Processing? So that some day it can more easily be integrated into the Arduino IDE (written in Java).
+
+Please help by cleaning up and encapsulating the code into various functions and error handlers. Thanks!
