@@ -1,0 +1,3 @@
+Screamer is a auto-detecting, high speed bootloader for microcontrollers. Specifically, we target the ATmega line by Atmel but the protocol and supporting programs should work for all microcontrollers.
+
+In this repository you will find the bootloader (written in C for AVC-GCC) and an example processing app to talk to the bootloader (cross platform supported). We welcome any feedback you may have. Please post any issues to the Github page.
