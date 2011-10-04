@@ -12,12 +12,15 @@ import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.UnsupportedCommOperationException;
 
-import javax.swing.JFileChooser; //For file open goodness
+//import javax.swing.JFileChooser; //For file open goodness
 
-int serialPortNumber = 1;
+int serialPortNumber = 0;
+boolean portSelected = false;
 
 import controlP5.*;
 ControlP5 controlP5;
+Button button1, button2, button3, button4, button5;
+DropdownList COMList;
 
 import processing.serial.*;
 Serial myPort;  // Create object from Serial class
@@ -72,16 +75,40 @@ void setup() {
   myFont = createFont("Arial", 16, true);
 
   controlP5 = new ControlP5(this);
-  controlP5.addButton("Identify", 255, 30, 50, 80, 19);
-  controlP5.addButton("Stop", 128, 30, 70, 80, 19);
-  controlP5.addButton("Restart", 128, 30, 90, 80, 19);
 
-  controlP5.addButton("File", 0, 30, 230, 80, 19);
-  controlP5.addButton("Download", 255, 30, 250, 80, 19);
+  button1 = controlP5.addButton("Identify", 255, 30, 50, 80, 19);
+  button2 = controlP5.addButton("EmergencyStop", 128, 30, 70, 80, 19);
+  button2.captionLabel().set("Emergency Stop");
+  //controlP5.addButton("Restart", 128, 30, 90, 80, 19);
+
+  COMList = controlP5.addDropdownList("myList-COMs", 30, 111, 80, 100);
+  COMList.setBackgroundColor(color(190));
+  COMList.setItemHeight(20);
+  COMList.setBarHeight(20);
+  COMList.captionLabel().set("Com Port");
+  COMList.captionLabel().style().marginTop = 5;
+  COMList.captionLabel().style().marginLeft = 3;
+  COMList.valueLabel().style().marginTop = 3;
+  COMList.setColorActive(color(255,128));
+
+  //Identify the available COM ports
+  Enumeration ports = CommPortIdentifier.getPortIdentifiers();
+  int x = 0;
+  while (ports.hasMoreElements()) {
+    CommPortIdentifier cpi = (CommPortIdentifier) ports.nextElement();
+    COMList.addItem(cpi.getName(), x++);
+  }
+  if(x == 1) { //We only have one com port! Let's assume it's the one we need.
+    serialPortNumber = 0;
+    portSelected = true;
+  }
+
+  button3 = controlP5.addButton("OpenFile", 0, 30, 230, 80, 19);
+  button3.captionLabel().set("Open File");
+  button4 = controlP5.addButton("Download", 255, 30, 250, 80, 19);
 
   compressedHEX = new byte[65000]; //Allocates memory for 65000 integers
   //Instead of pre-assigning this, we should be allocating this array based on the firmware file we open
-
   lastMemoryAddress = 0;
 
   textFont(myFont);
@@ -92,10 +119,9 @@ void setup() {
   identTime2 = 0;
 
   WeHaveAFile = false;
-  //WeHaveAFile = true; //For demoing
   fileName = "Click FILE";
 
-  board_guess = "Hit identify";
+  board_guess = "Select a port";
 }
 
 void draw() {
@@ -435,7 +461,26 @@ public int stk500_bootload() {
 }
 
 public void controlEvent(ControlEvent theEvent) {
-  println(theEvent.controller().name());
+  //println(theEvent.controller().name());
+
+  // PulldownMenu is if type ControlGroup.
+  // A controlEvent will be triggered from within the ControlGroup.
+  // therefore you need to check the originator of the Event with
+  // if (theEvent.isGroup())
+  // to avoid an error message from controlP5.
+
+  if (theEvent.isGroup()) {
+    // check if the Event was triggered from a ControlGroup
+    if(theEvent.name() == "myList-COMs"){
+      serialPortNumber = int(theEvent.group().value()); //The user has selected a com port!
+      println("Port Number: " + serialPortNumber);
+      portSelected = true;
+    }
+    //println(theEvent.group().value() + " from " + theEvent.group());
+  } else if(theEvent.isController()) {
+    //println(theEvent.controller().value() + " from " + theEvent.controller());
+    println(theEvent.controller().name());
+  }
 }
 
 public void serialTesting() throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException, IOException, TooManyListenersException {
@@ -590,12 +635,13 @@ public void screamer_begin_download() {
   loadTime2 = millis(); //We use load time variable as a timer. Start the timer.
 }
 
-public void Stop(int theValue) {
+public void EmergencyStop(int theValue) {
   println("Emergency stop");
   emergency_stop = true;
 }
 
-public void File(int theValue) {
+//When you click on the open file button, this runs
+public void OpenFile(int theValue) {
   println("Open File!");
 
   String loadPath = selectInput();  // Opens file chooser
@@ -604,14 +650,17 @@ public void File(int theValue) {
     println("No file was selected...");
   } 
   else {
-    // If a file was selected, print path to file
     fullFilePath = loadPath;
     println(fullFilePath);
+
+    //We now have the full path to the file, now let's try to strip out just the file name
+    
     int findSpot = fullFilePath.lastIndexOf((char)92); //Char 92 is the '\'. Works with Windows
     if(findSpot == -1) findSpot = fullFilePath.lastIndexOf((char)47); //Char 47 is the '/'. Should work with linux/mac
     //println(findSpot);
     fileName = fullFilePath.substring(findSpot + 1);
     println(fileName);
+
     WeHaveAFile = true;
   }
   return;
@@ -619,10 +668,18 @@ public void File(int theValue) {
 
 //When you hit the button, this runs
 public void Download(int theValue) {
-  if (WeHaveAFile == true) 
-    screamer_begin_download();
-  else
+  if(portSelected == false){
+    fileName = "Please select a port!";
+    return;
+  }
+
+  if (WeHaveAFile == false){
     fileName = "Please click FILE!";
+    return;
+  }
+  
+  //Go!
+  screamer_begin_download();
 }
 
 //This function talks to bootloaders based on the STK protocol
@@ -828,6 +885,13 @@ public int stk500_check_testchar(int portSpeed) {
 
 //When you hit the button, this runs
 public void Identify(int theValue) {
+
+  if(portSelected == false) {
+    println("Please select a COM port!");
+    board_guess = "Select a COM port";
+    return;    
+  }
+  
   identTime1 = millis();
 
   println("Identify Board:");
