@@ -1,0 +1,46 @@
+   1               		.file	"Frequency_Test.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               	.global	main
+  18               	main:
+  19               	.LFB2:
+  20               	.LM1:
+  21               	/* prologue: function */
+  22               	/* frame size = 0 */
+  23               	.LM2:
+  24 0000 1092 C500 		sts 197,__zero_reg__
+  25               	.LM3:
+  26 0004 87E6      		ldi r24,lo8(103)
+  27 0006 8093 C400 		sts 196,r24
+  28               	.LM4:
+  29 000a 88E1      		ldi r24,lo8(24)
+  30 000c 8093 C100 		sts 193,r24
+  31               	.LM5:
+  32 0010 82E0      		ldi r24,lo8(2)
+  33 0012 8093 C000 		sts 192,r24
+  34               	.LM6:
+  35 0016 88E5      		ldi r24,lo8(88)
+  36 0018 8093 C600 		sts 198,r24
+  37               	.LM7:
+  38 001c 80E0      		ldi r24,lo8(0)
+  39 001e 90E0      		ldi r25,hi8(0)
+  40               	/* epilogue start */
+  41 0020 0895      		ret
+  42               	.LFE2:
+  68               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 Frequency_Test.c
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:2      *ABS*:0000003f __SREG__
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:5      *ABS*:00000034 __CCP__
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Main\AppData\Local\Temp/ccs8pPx8.s:18     .text:00000000 main
+
+NO UNDEFINED SYMBOLS
