@@ -90,13 +90,15 @@ String property_VOLT;
 String property_TAG; 
 String property_TUG; 
 String property_BLT; //Boot loader type
+boolean property_EXT; //Extended command support
 String board_guess;
 String IC_type; //Used during board identification. Contains a string like "ATmega328"
 
 //byte[] compressedHEX; //This is the large array that contains all the program binary data
 
 int myColor_black = color(0, 0, 0);
-PFont myFont;
+PFont regularFont;
+PFont bigFont;
 
 long loadTime1, loadTime2; //Timers for bootload timing
 long identTime1, identTime2; //Timers for identification timing
@@ -107,11 +109,12 @@ int fileSize;
 String fullFilePath;
 
 void setup() {
-  size(600, 340);
+  size(600, 300);
   smooth();
   frameRate(30);
 
-  myFont = createFont("Arial", 16, true);
+  regularFont = createFont("Arial", 16, true);
+  bigFont = createFont("Arial", 24, true);
 
   controlP5 = new ControlP5(this);
 
@@ -152,7 +155,6 @@ void setup() {
   //compressedHEX = new byte[65000]; //Allocates memory for 65000 integers
   //Instead of pre-assigning this, we should be allocating this array based on the firmware file we open
 
-  textFont(myFont);
 
   loadTime1 = 0;
   loadTime2 = 0;
@@ -171,8 +173,13 @@ void draw() {
   fill(255);
   textAlign(CENTER);
 
-  text("My board guess: " + board_guess, width/2, 40);
+  textFont(bigFont);
+  if(board_guess == "Select a port")
+    text("Select a port", width/2, 30);
+  else
+    text("Select board: " + board_guess, width/2, 30);
 
+  textFont(regularFont);
   //Display board type
   text("IC Code: " + property_ICID, width/2, 60);
 
@@ -185,32 +192,40 @@ void draw() {
   text("Boot loader type: " + property_BLT, width/2, 120);
 
   //Display page size
-  text("Chip page size: " + property_PS, width/2, 140);
+  //text("Chip page size: " + property_PS, width/2, 140);
+  
+  //Display extendedCommandSupport
+  if(extendedCommandSupport == true)
+    text("Extended commands supported", width/2, 140);
+  else
+    text("Extended commands not supported", width/2, 140);
 
   //Display identification time
   long identTime = identTime2 - identTime1;
   text("Identification time: " + identTime/1000 + "." + identTime%1000, width/2, 160);
 
-  text("Firmware file: " + fileName, width/2, 200);
+  //Display code space
+  text("Available code space: " + property_ACS, width/2, 180);
 
-  text("File size: " + fileSize + "(bytes)", width/2, 220);
+  //Display board name
+  //text("Board tag: " + property_TAG, width/2, 200);
+
+  //Display board voltage
+  //text("Board voltage: " + property_VOLT, width/2, 220);
+
+  //Display TUG
+  //text("Time until giveup: " + property_TUG, width/2, 240);
+
+
+
+  //These are for bootload speed testing
+  text("Firmware file: " + fileName, width/2, 240);
+
+  text("File size: " + fileSize + "(bytes)", width/2, 260);
 
   //Display load time
   long totalTime = loadTime2 - loadTime1;
-  text("Total load time: " + totalTime/1000 + "." + totalTime%1000, width/2, 240);
-
-
-  //Display board name
-  text("Board tag: " + property_TAG, width/2, 260);
-
-  //Display code space
-  text("Available code space: " + property_ACS, width/2, 280);
-
-  //Display board voltage
-  text("Board voltage: " + property_VOLT, width/2, 300);
-
-  //Display TUG
-  text("Time until giveup: " + property_TUG, width/2, 320);
+  text("Total load time: " + totalTime/1000 + "." + totalTime%1000, width/2, 280);
 }
 
 public void controlEvent(ControlEvent theEvent) {
